@@ -16,15 +16,15 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.CICD_PEM }}" > ~/.ssh/cicd.pem
-          chmod 600 ~/.ssh/cicd.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Add server to known hosts
-        run: ssh-keyscan -H ec2-44-204-23-17.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H 44.204.23.17 >> ~/.ssh/known_hosts
 
       - name: Install Apache2 on Remote Server
         run: |
-          ssh -v -i ~/.ssh/cicd.pem -o StrictHostKeyChecking=no ubuntu@ec2-44-204-23-17.compute-1.amazonaws.com << EOF
+          ssh -o StrictHostKeyChecking=no ubuntu@44.204.23.17 << EOF
             sudo apt-get update
             sudo apt-get install -y apache2
             sudo systemctl start apache2
