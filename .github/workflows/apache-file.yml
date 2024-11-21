@@ -1,29 +1,32 @@
-name: Install Apache2
+name: Install Apache2 on Remote Server
 
 on:
   push:
     branches:
-      - main  # Run the workflow on pushes to the main branch
+      - main  # Trigger the workflow on pushes to the main branch
 
 jobs:
   install-apache2:
-    runs-on: ubuntu-latest  # Use an Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Update package list
-        run: sudo apt-get update
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Install Apache2
-        run: sudo apt-get install -y apache2
+      - name: Add server to known hosts
+        run: ssh-keyscan -H 44.204.23.17 >> ~/.ssh/known_hosts
 
-      - name: Check Apache2 version
-        run: apache2 -v
-
-      - name: Start Apache2 service
-        run: sudo systemctl start apache2
-
-      - name: Verify Apache2 status
-        run: sudo systemctl status apache2
+      - name: Install Apache2 on Remote Server
+        run: |
+          ssh -o StrictHostKeyChecking=no user@44.204.23.17 << EOF
+            sudo apt-get update
+            sudo apt-get install -y apache2
+            sudo systemctl start apache2
+            sudo systemctl enable apache2
+          EOF
