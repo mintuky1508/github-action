@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Apache2 on Remote Server
         run: |
-          ssh -i ~/.ssh/cicd.pem -o StrictHostKeyChecking=no ubuntu@ec2-44-204-23-17.compute-1.amazonaws.com << EOF
+          ssh -v -i ~/.ssh/cicd.pem -o StrictHostKeyChecking=no ubuntu@ec2-44-204-23-17.compute-1.amazonaws.com << EOF
             sudo apt-get update
             sudo apt-get install -y apache2
             sudo systemctl start apache2
