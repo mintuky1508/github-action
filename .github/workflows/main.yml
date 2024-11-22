@@ -1,4 +1,4 @@
-name: Install Apache on EC2
+name: Install Apache and Deliver HTML on EC2
 
 on:
   push:
@@ -6,21 +6,40 @@ on:
       - main
 
 jobs:
-  install-apache:
+  deliver-html:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Apache on EC2
+      - name: Set up Apache and deliver HTML on EC2
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_IP }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Update and install Apache
             sudo apt update -y
             sudo apt install apache2 -y
             sudo systemctl start apache2
             sudo systemctl enable apache2
+
+            # Create a simple HTML file
+            echo '<!DOCTYPE html>
+            <html>
+            <head>
+                <title>Welcome</title>
+            </head>
+            <body>
+                <h1>Hello, Apache is working!</h1>
+            </body>
+            </html>' | sudo tee /var/www/html/index.html > /dev/null
+
+            # Adjust permissions
+            sudo chown www-data:www-data /var/www/html/index.html
+            sudo chmod 644 /var/www/html/index.html
+
+            # Restart Apache to apply changes
+            sudo systemctl restart apache2
